@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->enum('role', ['buyer', 'seller', 'admin'])->default('buyer'); // تحديد الدور
             $table->string('phone')->nullable(); // رقم الهاتف
             $table->string('address')->nullable(); // العنوان للمشتري
             $table->string('store_name')->nullable(); // اسم المتجر للبائع
