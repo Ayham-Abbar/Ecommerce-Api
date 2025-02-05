@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,7 @@ Route::middleware('auth:api')->post('refresh-token', [AuthController::class, 're
 Route::middleware('auth:api')->get('profile', [AuthController::class, 'profile']);
 Route::middleware('auth:api')->post('request-seller-upgrade', [AuthController::class, 'requestSellerUpgrade']);
 
+//this is for products routes
 Route::group(['middleware' => 'auth:api'], function () {
       // أي مستخدم مصادق عليه يمكنه رؤية قائمة المنتجات
       Route::get('products', [ProductController::class, 'index']);
@@ -32,3 +34,11 @@ Route::group(['middleware' => 'auth:api'], function () {
       // فقط المشتري (buyer) يمكنه إضافة/إزالة منتج من المفضلة
       Route::post('products/{id}/toggle-favorite', [ProductController::class, 'toggleFavorite'])->middleware('role:buyer');
 });
+//this is for categories routes
+Route::middleware('auth:api')->group(function () {
+      Route::get('categories', [CategoryController::class, 'index']);
+      Route::post('categories', [CategoryController::class, 'store'])->middleware('role:admin');
+      Route::get('categories/{id}', [CategoryController::class, 'show']);
+      Route::put('categories/{id}', [CategoryController::class, 'update'])->middleware('role:admin');
+      Route::delete('categories/{id}', [CategoryController::class, 'destroy'])->middleware('role:admin');
+  });
