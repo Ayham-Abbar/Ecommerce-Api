@@ -36,9 +36,18 @@ Route::group(['middleware' => 'auth:api'], function () {
 });
 //this is for categories routes
 Route::middleware('auth:api')->group(function () {
+      // فقط المدير (admin) يمكنه عرض قائمة الفئات
       Route::get('categories', [CategoryController::class, 'index']);
+
+      // فقط المدير (admin) يمكنه إضافة فئة
       Route::post('categories', [CategoryController::class, 'store'])->middleware('role:admin');
+
+      // فقط المدير (admin) يمكنه عرض معلومات فئة
       Route::get('categories/{id}', [CategoryController::class, 'show']);
+
+      // فقط المدير (admin) يمكنه تعديل فئة
       Route::put('categories/{id}', [CategoryController::class, 'update'])->middleware('role:admin');
+
+      // فقط المدير (admin) يمكنه حذف فئة
       Route::delete('categories/{id}', [CategoryController::class, 'destroy'])->middleware('role:admin');
   });
