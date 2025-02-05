@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Favorite;
 use App\Models\Product;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -66,17 +67,16 @@ class ProductController extends Controller
         $user = JWTAuth::user();
 
         // البحث عن المنتج والتحقق من أنه يخص البائع الحالي
-        $product = Product::where('id', $id)->where('seller_id', $user->id)->firstOrFail();
+        $product = Product::where('id', $id)->firstOrFail();
 
+        Gate::authorize('update',$product);
         // تحديث الفئة إذا تم إرسالها في الطلب
         if ($request->has('category')) {
             $category = Category::firstOrCreate(['name' => $request->category]);
             $product->category_id = $category->id;
         }
-
         // تحديث البيانات المطلوبة
         $product->update($request->only(['name', 'price']));
-
         // حفظ المنتج بعد التعديلات
         $product->save();
 
@@ -90,7 +90,9 @@ class ProductController extends Controller
     // حذف منتج للبائع
     public function destroy($id)
     {
-        $product = Product::where('id', $id)->where('seller_id', JWTAuth::user()->id)->firstOrFail();
+        $product = Product::where('id', $id)->firstOrFail();
+        
+        Gate::authorize('delete',$product);
 
         $product->delete();
 
