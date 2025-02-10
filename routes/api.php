@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -65,4 +66,8 @@ Route::middleware('auth:api')->group(function () {
 Route::middleware('auth:api')->group(function () {
       Route::post('orders', [OrderController::class, 'checkout'])->middleware('role:buyer');
       Route::get('orders', [OrderController::class, 'getOrders'])->middleware('role:buyer');
+});
+
+Route::middleware('auth:api')->group(function () {
+      Route::post('checkout', [PaymentController::class, 'checkout'])->middleware('role:buyer');
 });
