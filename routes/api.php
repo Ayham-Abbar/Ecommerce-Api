@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -59,4 +60,9 @@ Route::middleware('auth:api')->group(function () {
       Route::delete('carts/{id}', [CartController::class, 'removeFromCart'])->middleware('role:buyer');
       Route::get('carts', [CartController::class, 'getCart'])->middleware('role:buyer');
       Route::delete('carts', [CartController::class, 'clearCart'])->middleware('role:buyer');
+});
+
+Route::middleware('auth:api')->group(function () {
+      Route::post('orders', [OrderController::class, 'checkout'])->middleware('role:buyer');
+      Route::get('orders', [OrderController::class, 'getOrders'])->middleware('role:buyer');
 });
