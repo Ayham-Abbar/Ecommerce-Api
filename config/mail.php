@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'log'),
+    'default' => env('MAIL_MAILER', 'smtp'),
 
     /*
     |--------------------------------------------------------------------------
@@ -74,6 +74,7 @@ return [
             'transport' => 'log',
             'channel' => env('MAIL_LOG_CHANNEL'),
         ],
+        
 
         'array' => [
             'transport' => 'array',

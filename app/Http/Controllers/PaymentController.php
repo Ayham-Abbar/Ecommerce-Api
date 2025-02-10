@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Models\User;
+use App\Notifications\PaymentSuccessful;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Stripe\Stripe;
@@ -36,7 +38,9 @@ class PaymentController extends Controller
                 'payment_status' => $charge->status,
                 'payment_details' => json_encode($charge), // تخزين تفاصيل الدفع
             ]);
-
+            
+            $user = User::find(Auth::user()->id);
+            $user->notify(new PaymentSuccessful($payment));
             //يعيد الرد للمستخدم بنجاح
             return response()->json(['message' => 'Payment successful', 'charge' => $charge], 200);
         } catch (\Exception $e) {
