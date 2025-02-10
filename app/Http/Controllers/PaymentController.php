@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Stripe\Stripe;
 use Stripe\Charge;
 
@@ -26,6 +28,14 @@ class PaymentController extends Controller
                 'source' => $request->token,
                 'description' => 'Order Payment'
             ]);
+            $payment = Payment::create([
+                'buyer_id' => Auth::user()->id, // المستخدم الذي قام بالدفع
+                'payment_id' => $charge->id, // معرف الدفع من Stripe
+                'amount' => $charge->amount / 100, // تحويل من سنتات إلى دولار
+                'currency' => $charge->currency,
+                'payment_status' => $charge->status,
+                'payment_details' => json_encode($charge), // تخزين تفاصيل الدفع
+            ]);
 
             //يعيد الرد للمستخدم بنجاح
             return response()->json(['message' => 'Payment successful', 'charge' => $charge], 200);
@@ -33,5 +43,10 @@ class PaymentController extends Controller
             //يعيد الرد للمستخدم بخطأ
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+    public function getPayments()
+    {
+        $payments = Payment::where('buyer_id', Auth::user()->id)->get();
+        return response()->json($payments);
     }
 }

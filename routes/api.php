@@ -70,4 +70,5 @@ Route::middleware('auth:api')->group(function () {
 
 Route::middleware('auth:api')->group(function () {
       Route::post('checkout', [PaymentController::class, 'checkout'])->middleware('role:buyer');
+      Route::get('payments', [PaymentController::class, 'getPayments'])->middleware('role:buyer');
 });
