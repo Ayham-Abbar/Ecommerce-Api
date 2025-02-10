@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
@@ -50,4 +51,12 @@ Route::middleware('auth:api')->group(function () {
 
       // فقط المدير (admin) يمكنه حذف فئة
       Route::delete('categories/{id}', [CategoryController::class, 'destroy'])->middleware('role:admin');
-  });
+});
+
+Route::middleware('auth:api')->group(function () {
+      Route::post('carts', [CartController::class, 'addToCart'])->middleware('role:buyer');
+      Route::put('carts/{id}', [CartController::class, 'updateCart'])->middleware('role:buyer');
+      Route::delete('carts/{id}', [CartController::class, 'removeFromCart'])->middleware('role:buyer');
+      Route::get('carts', [CartController::class, 'getCart'])->middleware('role:buyer');
+      Route::delete('carts', [CartController::class, 'clearCart'])->middleware('role:buyer');
+});
