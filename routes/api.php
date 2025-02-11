@@ -3,6 +3,9 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\Dashboard\AdminController;
+use App\Http\Controllers\Dashboard\BuyerController;
+use App\Http\Controllers\Dashboard\SellerController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
@@ -78,4 +81,15 @@ Route::middleware('auth:api')->group(function () {
       Route::post('seller-requests', [SellerRequestController::class, 'requestSellerRole'])->middleware('role:buyer');
       Route::get('seller-requests', [SellerRequestController::class, 'getAllRequests'])->middleware('role:admin');
       Route::put('seller-requests/{id}', [SellerRequestController::class, 'approveOrReject'])->middleware('role:admin');
+});
+Route::middleware('auth:api')->group(function () {
+      Route::middleware('role:admin')->group(function () {
+            Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);            
+      });
+      Route::middleware('role:seller')->group(function () {
+            Route::get('/seller/dashboard', [SellerController::class, 'dashboard']);
+      });
+      Route::middleware('role:buyer')->group(function () {
+            Route::get('/buyer/dashboard', [BuyerController::class, 'dashboard']);
+      });
 });
