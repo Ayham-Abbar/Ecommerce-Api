@@ -6,6 +6,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SellerRequestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -71,4 +72,10 @@ Route::middleware('auth:api')->group(function () {
 Route::middleware('auth:api')->group(function () {
       Route::post('checkout', [PaymentController::class, 'checkout'])->middleware('role:buyer');
       Route::get('payments', [PaymentController::class, 'getPayments'])->middleware('role:buyer');
+});
+
+Route::middleware('auth:api')->group(function () {
+      Route::post('seller-requests', [SellerRequestController::class, 'requestSellerRole'])->middleware('role:buyer');
+      Route::get('seller-requests', [SellerRequestController::class, 'getAllRequests'])->middleware('role:admin');
+      Route::put('seller-requests/{id}', [SellerRequestController::class, 'approveOrReject'])->middleware('role:admin');
 });
