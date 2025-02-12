@@ -46,6 +46,10 @@ class SellerRequestController extends Controller
         $sellerRequest->rejection_reason = $request->status === 'rejected' ? $request->rejection_reason : null;
         $sellerRequest->save();
 
+        if ($request->status === 'approved') {
+            $sellerRequest->buyer->removeRole('buyer');
+            $sellerRequest->buyer->assignRole('seller');
+        }
         // Send notification to the buyer
         $sellerRequest->buyer->notify(new SellerRequestStatusNotification($request->status, $request->rejection_reason));
 

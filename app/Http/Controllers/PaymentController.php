@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Payment;
+use App\Models\SellerPayment;
 use App\Models\User;
 use App\Notifications\PaymentSuccessful;
 use Illuminate\Http\Request;
@@ -15,30 +18,45 @@ class PaymentController extends Controller
     public function checkout(Request $request)
     {
         $request->validate([
-            'amount' => 'required|numeric|min:1',
             'token' => 'required'
         ]);
 
+        $user = Auth::user();
+        $order = Order::where('buyer_id', $user->id)->where('status', 'pending')->firstOrFail();
         //يستخدم للربط بين الموقع والحساب الخاص بالموقع في الموقع الخاص بسترايب
         Stripe::setApiKey(env('STRIPE_SECRET_KEY'));
 
         try {
             //يستخدم لإنشاء المعلومات المطلوبة للدفع
             $charge = Charge::create([
-                'amount' => $request->amount * 100, // Stripe يستخدم السنتات
+                'amount' =>$order->total_price * 100, // Stripe يستخدم السنتات
                 'currency' => 'usd',
                 'source' => $request->token,
                 'description' => 'Order Payment'
             ]);
             $payment = Payment::create([
-                'buyer_id' => Auth::user()->id, // المستخدم الذي قام بالدفع
+                'buyer_id' => $user->id, // المستخدم الذي قام بالدفع
                 'payment_id' => $charge->id, // معرف الدفع من Stripe
-                'amount' => $charge->amount / 100, // تحويل من سنتات إلى دولار
+                'amount' => $order->total_price, // تحويل من سنتات إلى دولار
                 'currency' => $charge->currency,
                 'payment_status' => $charge->status,
                 'payment_details' => json_encode($charge), // تخزين تفاصيل الدفع
             ]);
-            
+
+            // توزيع المبلغ على البائعين
+            $orderItems = OrderItem::where('order_id', $order->id)->get();
+
+            $seller_payments = [];
+            foreach ($orderItems as $item) {
+                $seller_payments[] = SellerPayment::create([
+                    'seller_id' => $item->product->seller_id,
+                    'order_id' => $order->id,
+                    'amount' => $item->price_at_purchase * $item->quantity,
+                    'status' => 'pending', // لم يتم الدفع للبائع بعد
+                ]);
+            }
+            $order->status = 'completed';
+            $order->save();
             $user = User::find(Auth::user()->id);
             $user->notify(new PaymentSuccessful($payment));
             //يعيد الرد للمستخدم بنجاح
